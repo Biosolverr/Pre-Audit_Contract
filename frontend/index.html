@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contract Auditor — AI Security Pre-Audit on GenLayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ──────────────────────────────────────────────────────────── */
+    :root {
+      --bg:        #0a0a0b;
+      --surface:   #111114;
+      --surface2:  #18181d;
+      --border:    #252530;
+      --border2:   #32323f;
+      --text:      #e8e8f0;
+      --muted:     #7a7a8c;
+      --dim:       #4a4a5a;
+      --accent:    #c8f0d0;    /* cold mint — security / safe */
+      --accent2:   #8be0a0;
+      --critical:  #ff5566;
+      --high:      #ff9944;
+      --medium:    #ffcc44;
+      --low:       #66ccff;
+      --info:      #aaaacc;
+      --good:      #66dd88;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'Inter', system-ui, sans-serif;
+    }
+
+    /* ── Reset ───────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────────────── */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0 18px;
+    }
+    header .container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { color: var(--bg); }
+    .logo-text {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .logo-text span { color: var(--accent); }
+    .header-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Hero ────────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 72px 0 56px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      max-width: 680px;
+      margin-bottom: 20px;
+    }
+    .hero h1 strong {
+      font-weight: 600;
+      color: #fff;
+    }
+    .hero-desc {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    /* Stat row */
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--dim);
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Audit Form ──────────────────────────────────────────────────────── */
+    .audit-section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+    }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .input-group { flex: 1; min-width: 260px; }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+    input[type="text"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 11px 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]::placeholder { color: var(--dim); }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 5px;
+      border: none;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+    .btn-icon { font-size: 15px; }
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+
+    /* Status / progress */
+    .status-box {
+      margin-top: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: none;
+    }
+    .status-box.visible { display: block; }
+    .status-box.error { border-color: var(--critical); color: var(--critical); background: rgba(255,85,102,0.06); }
+    .status-box.success { border-color: var(--good); color: var(--good); background: rgba(102,221,136,0.06); }
+
+    .spinner {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Report ──────────────────────────────────────────────────────────── */
+    .report-section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--border);
+      display: none;
+    }
+    .report-section.visible { display: block; }
+
+    .report-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .report-title { font-size: 20px; font-weight: 500; color: #fff; margin-bottom: 6px; }
+    .report-repo {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    /* Risk badge */
+    .risk-badge {
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .risk-Critical { background: rgba(255,85,102,0.15); color: var(--critical); border: 1px solid rgba(255,85,102,0.3); }
+    .risk-High     { background: rgba(255,153,68,0.15); color: var(--high);     border: 1px solid rgba(255,153,68,0.3); }
+    .risk-Medium   { background: rgba(255,204,68,0.12); color: var(--medium);   border: 1px solid rgba(255,204,68,0.3); }
+    .risk-Low      { background: rgba(102,204,255,0.12); color: var(--low);     border: 1px solid rgba(102,204,255,0.3); }
+    .risk-Info     { background: rgba(170,170,204,0.12); color: var(--info);    border: 1px solid rgba(170,170,204,0.3); }
+
+    /* Score meter */
+    .score-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .score-number {
+      font-family: var(--mono);
+      font-size: 48px;
+      font-weight: 600;
+      line-height: 1;
+      color: #fff;
+      min-width: 80px;
+    }
+    .score-bar-wrap { flex: 1; min-width: 200px; }
+    .score-bar-label { font-size: 12px; color: var(--muted); font-family: var(--mono); margin-bottom: 8px; }
+    .score-bar-track {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--critical) 0%, var(--medium) 40%, var(--good) 80%);
+      transition: width 0.6s ease;
+    }
+    .score-meta {
+      font-size: 11px;
+      color: var(--dim);
+      font-family: var(--mono);
+      margin-top: 6px;
+    }
+
+    /* Summary */
+    .summary-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* Vuln grid */
+    .vuln-section-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .vuln-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .vuln-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 18px;
+      border-left-width: 3px;
+    }
+    .vuln-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .vuln-id {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 0.06em;
+    }
+    .sev-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .sev-Critical { background: rgba(255,85,102,0.15); color: var(--critical); }
+    .sev-High     { background: rgba(255,153,68,0.15); color: var(--high); }
+    .sev-Medium   { background: rgba(255,204,68,0.12); color: var(--medium); }
+    .sev-Low      { background: rgba(102,204,255,0.12); color: var(--low); }
+    .sev-Info     { background: rgba(170,170,204,0.12); color: var(--info); }
+
+    .vuln-cat {
+      font-size: 11px;
+      color: var(--dim);
+      font-family: var(--mono);
+    }
+    .vuln-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .vuln-desc  { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 8px; }
+    .vuln-rec   {
+      font-size: 12px;
+      color: var(--accent);
+      font-family: var(--mono);
+      background: rgba(200,240,208,0.05);
+      border: 1px solid rgba(200,240,208,0.1);
+      border-radius: 4px;
+      padding: 8px 12px;
+      line-height: 1.6;
+    }
+    .vuln-rec::before { content: '→  '; opacity: 0.5; }
+
+    /* no vulns */
+    .no-vulns {
+      text-align: center;
+      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--good);
+      margin-bottom: 28px;
+    }
+
+    /* Coverage / Docs */
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .meta-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 18px;
+    }
+    .meta-card-label { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .meta-card-rating {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .rating-Good    { color: var(--good); }
+    .rating-Partial { color: var(--medium); }
+    .rating-Minimal { color: var(--high); }
+    .rating-None    { color: var(--critical); }
+    .meta-card-notes { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+    /* Powered by */
+    .powered {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .powered span { color: var(--accent); }
+
+    /* ── History ─────────────────────────────────────────────────────────── */
+    .history-section { padding: 56px 0; }
+    .history-empty {
+      padding: 32px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+    }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      flex-wrap: wrap;
+    }
+    .history-item:hover { border-color: var(--border2); }
+    .history-risk { flex-shrink: 0; }
+    .history-url {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .history-score {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+    }
+    footer .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-text { font-size: 12px; color: var(--dim); font-family: var(--mono); }
+    .footer-link { color: var(--muted); text-decoration: none; }
+    .footer-link:hover { color: var(--accent); }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .meta-grid { grid-template-columns: 1fr; }
+      .score-block { gap: 16px; }
+      .score-number { font-size: 36px; }
+      .hero { padding: 48px 0 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="logo-text">Contract<span>Auditor</span></div>
+    </div>
+    <div class="header-badge">Powered by GenLayer</div>
+  </div>
+</header>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">AI Security Analysis · On-Chain Consensus</div>
+    <h1>Smart Contract <strong>Security Pre-Audit</strong><br>powered by decentralized AI</h1>
+    <p class="hero-desc">
+      Submit any GitHub contract repository. GenLayer validators independently fetch the source,
+      run LLM-powered security analysis, and reach on-chain consensus — no oracles, no middlemen.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value" id="stat-count">—</div>
+        <div class="stat-label">audits on-chain</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">5+</div>
+        <div class="stat-label">vuln categories</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">AI</div>
+        <div class="stat-label">consensus nodes</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Audit Form ───────────────────────────────────────────────────────────── -->
+<section class="audit-section">
+  <div class="container">
+    <div class="section-label">01 — Submit Contract</div>
+    <div class="form-card">
+
+      <!-- Contract address row -->
+YPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contract Auditor — AI Security Pre-Audit on GenLayer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Tokens ──────────────────────────────────────────────────────────── */
+    :root {
+      --bg:        #0a0a0b;
+      --surface:   #111114;
+      --surface2:  #18181d;
+      --border:    #252530;
+      --border2:   #32323f;
+      --text:      #e8e8f0;
+      --muted:     #7a7a8c;
+      --dim:       #4a4a5a;
+      --accent:    #c8f0d0;    /* cold mint — security / safe */
+      --accent2:   #8be0a0;
+      --critical:  #ff5566;
+      --high:      #ff9944;
+      --medium:    #ffcc44;
+      --low:       #66ccff;
+      --info:      #aaaacc;
+      --good:      #66dd88;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'Inter', system-ui, sans-serif;
+    }
+
+    /* ── Reset ───────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────────────── */
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0 18px;
+    }
+    header .container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-icon svg { color: var(--bg); }
+    .logo-text {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .logo-text span { color: var(--accent); }
+    .header-badge {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Hero ────────────────────────────────────────────────────────────── */
+    .hero {
+      padding: 72px 0 56px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 300;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      max-width: 680px;
+      margin-bottom: 20px;
+    }
+    .hero h1 strong {
+      font-weight: 600;
+      color: #fff;
+    }
+    .hero-desc {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+    }
+
+    /* Stat row */
+    .hero-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stat-value {
+      font-family: var(--mono);
+      font-size: 22px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--dim);
+      font-family: var(--mono);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Audit Form ──────────────────────────────────────────────────────── */
+    .audit-section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 28px;
+    }
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .input-group { flex: 1; min-width: 260px; }
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+    input[type="text"] {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 5px;
+      padding: 11px 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]::placeholder { color: var(--dim); }
+    input[type="text"]:focus { border-color: var(--accent); }
+    input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 5px;
+      border: none;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+    .btn-icon { font-size: 15px; }
+    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+
+    /* Status / progress */
+    .status-box {
+      margin-top: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: none;
+    }
+    .status-box.visible { display: block; }
+    .status-box.error { border-color: var(--critical); color: var(--critical); background: rgba(255,85,102,0.06); }
+    .status-box.success { border-color: var(--good); color: var(--good); background: rgba(102,221,136,0.06); }
+
+    .spinner {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Report ──────────────────────────────────────────────────────────── */
+    .report-section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--border);
+      display: none;
+    }
+    .report-section.visible { display: block; }
+
+    .report-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+    .report-title { font-size: 20px; font-weight: 500; color: #fff; margin-bottom: 6px; }
+    .report-repo {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    /* Risk badge */
+    .risk-badge {
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .risk-Critical { background: rgba(255,85,102,0.15); color: var(--critical); border: 1px solid rgba(255,85,102,0.3); }
+    .risk-High     { background: rgba(255,153,68,0.15); color: var(--high);     border: 1px solid rgba(255,153,68,0.3); }
+    .risk-Medium   { background: rgba(255,204,68,0.12); color: var(--medium);   border: 1px solid rgba(255,204,68,0.3); }
+    .risk-Low      { background: rgba(102,204,255,0.12); color: var(--low);     border: 1px solid rgba(102,204,255,0.3); }
+    .risk-Info     { background: rgba(170,170,204,0.12); color: var(--info);    border: 1px solid rgba(170,170,204,0.3); }
+
+    /* Score meter */
+    .score-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 22px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .score-number {
+      font-family: var(--mono);
+      font-size: 48px;
+      font-weight: 600;
+      line-height: 1;
+      color: #fff;
+      min-width: 80px;
+    }
+    .score-bar-wrap { flex: 1; min-width: 200px; }
+    .score-bar-label { font-size: 12px; color: var(--muted); font-family: var(--mono); margin-bottom: 8px; }
+    .score-bar-track {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .score-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--critical) 0%, var(--medium) 40%, var(--good) 80%);
+      transition: width 0.6s ease;
+    }
+    .score-meta {
+      font-size: 11px;
+      color: var(--dim);
+      font-family: var(--mono);
+      margin-top: 6px;
+    }
+
+    /* Summary */
+    .summary-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    /* Vuln grid */
+    .vuln-section-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .vuln-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .vuln-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 18px;
+      border-left-width: 3px;
+    }
+    .vuln-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .vuln-id {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 0.06em;
+    }
+    .sev-badge {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      padding: 2px 8px;
+      border-radius: 3px;
+      text-transform: uppercase;
+    }
+    .sev-Critical { background: rgba(255,85,102,0.15); color: var(--critical); }
+    .sev-High     { background: rgba(255,153,68,0.15); color: var(--high); }
+    .sev-Medium   { background: rgba(255,204,68,0.12); color: var(--medium); }
+    .sev-Low      { background: rgba(102,204,255,0.12); color: var(--low); }
+    .sev-Info     { background: rgba(170,170,204,0.12); color: var(--info); }
+
+    .vuln-cat {
+      font-size: 11px;
+      color: var(--dim);
+      font-family: var(--mono);
+    }
+    .vuln-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+    .vuln-desc  { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 8px; }
+    .vuln-rec   {
+      font-size: 12px;
+      color: var(--accent);
+      font-family: var(--mono);
+      background: rgba(200,240,208,0.05);
+      border: 1px solid rgba(200,240,208,0.1);
+      border-radius: 4px;
+      padding: 8px 12px;
+      line-height: 1.6;
+    }
+    .vuln-rec::before { content: '→  '; opacity: 0.5; }
+
+    /* no vulns */
+    .no-vulns {
+      text-align: center;
+      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--good);
+      margin-bottom: 28px;
+    }
+
+    /* Coverage / Docs */
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .meta-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px 18px;
+    }
+    .meta-card-label { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .meta-card-rating {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .rating-Good    { color: var(--good); }
+    .rating-Partial { color: var(--medium); }
+    .rating-Minimal { color: var(--high); }
+    .rating-None    { color: var(--critical); }
+    .meta-card-notes { font-size: 12px; color: var(--muted); line-height: 1.6; }
+
+    /* Powered by */
+    .powered {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--dim);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .powered span { color: var(--accent); }
+
+    /* ── History ─────────────────────────────────────────────────────────── */
+    .history-section { padding: 56px 0; }
+    .history-empty {
+      padding: 32px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+    }
+    .history-list { display: flex; flex-direction: column; gap: 8px; }
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      flex-wrap: wrap;
+    }
+    .history-item:hover { border-color: var(--border2); }
+    .history-risk { flex-shrink: 0; }
+    .history-url {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .history-score {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--dim);
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ──────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+    }
+    footer .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .footer-text { font-size: 12px; color: var(--dim); font-family: var(--mono); }
+    .footer-link { color: var(--muted); text-decoration: none; }
+    .footer-link:hover { color: var(--accent); }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .meta-grid { grid-template-columns: 1fr; }
+      .score-block { gap: 16px; }
+      .score-number { font-size: 36px; }
+      .hero { padding: 48px 0 36px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────────── -->
+<header>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div class="logo-text">Contract<span>Auditor</span></div>
+    </div>
+    <div class="header-badge">Powered by GenLayer</div>
+  </div>
+</header>
+
+<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-eyebrow">AI Security Analysis · On-Chain Consensus</div>
+    <h1>Smart Contract <strong>Security Pre-Audit</strong><br>powered by decentralized AI</h1>
+    <p class="hero-desc">
+      Submit any GitHub contract repository. GenLayer validators independently fetch the source,
+      run LLM-powered security analysis, and reach on-chain consensus — no oracles, no middlemen.
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-value" id="stat-count">—</div>
+        <div class="stat-label">audits on-chain</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">5+</div>
+        <div class="stat-label">vuln categories</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">AI</div>
+        <div class="stat-label">consensus nodes</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Audit Form ───────────────────────────────────────────────────────────── -->
+<section class="audit-section">
+  <div class="container">
+    <div class="section-label">01 — Submit Contract</div>
+    <div class="form-card">
+
+      <!-- Audit row -->
+      <label>GitHub Repository or Contract File URL</label>
+      <div class="form-row">
+        <div class="input-group">
+          <input type="text" id="repo-url"
+            placeholder="https://github.com/owner/repo/blob/main/contracts/Token.sol" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="audit-btn" onclick="submitAudit()">
+          <span class="btn-icon">⚡</span> Run Audit
+        </button>
+        <button class="btn btn-ghost" onclick="loadExample()">Load Example</button>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--dim);margin-left:4px;">
+          Supports .sol · .py (GenLayer)
+        </span>
+      </div>
+
+      <div class="status-box" id="status-box"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Report ───────────────────────────────────────────────────────────────── -->
+<section class="report-section" id="report-section">
+  <div class="container">
+    <div class="section-label">02 — Audit Report</div>
+
+    <div class="report-header">
+      <div>
+        <div class="report-title" id="report-title">Security Analysis</div>
+        <div class="report-repo" id="report-repo"></div>
+      </div>
+      <div class="risk-badge" id="report-risk"></div>
+    </div>
+
+    <!-- Score -->
+    <div class="score-block">
+      <div class="score-number" id="score-number">—</div>
+      <div class="score-bar-wrap">
+        <div class="score-bar-label">SECURITY SCORE</div>
+        <div class="score-bar-track">
+          <div class="score-bar-fill" id="score-bar" style="width:0%"></div>
+        </div>
+        <div class="score-meta" id="score-meta">Higher = more secure · 0–100</div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-block" id="report-summary"></div>
+
+    <!-- Vulnerabilities -->
+    <div class="vuln-section-title" id="vuln-title"></div>
+    <div id="vuln-container"></div>
+
+    <!-- Meta -->
+    <div class="meta-grid" id="meta-grid"></div>
+
+    <!-- Powered by -->
+    <div class="powered">
+      <span>✓</span> Consensus reached via <span>GenLayer Optimistic Democracy</span> — results verified by multiple AI validators on-chain.
+    </div>
+  </div>
+</section>
+
+<!-- ── History ──────────────────────────────────────────────────────────────── -->
+<section class="history-section">
+  <div class="container">
+    <div class="section-label">03 — On-Chain Audit History</div>
+    <div id="history-container">
+      <div class="history-empty">No audits yet. Submit your first contract above.</div>
+    </div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="loadHistory()">↺ Refresh</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-text">
+      Contract Auditor · Built on <a class="footer-link" href="https://genlayer.com" target="_blank">GenLayer</a>
+    </div>
+    <div class="footer-text" style="color:var(--dim)">
+      Pre-audit only — not a substitute for a professional audit.
+    </div>
+  </div>
+</footer>
+
+<!-- ── GenLayer JS ──────────────────────────────────────────────────────────── -->
+<script type="module">
+  import { createClient, chains } from 'https://esm.sh/genlayer-js@latest';
+
+  // ── Client setup ──────────────────────────────────────────────────────────
+  const client = createClient({ chain: chains.studionet });
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  const CONTRACT_ADDRESS = '0x3c51e970B76631Ed10a73CB3Ed5900693e362Ca7';
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  function el(id) { return document.getElementById(id); }
+
+  function setStatus(msg, type = '') {
+    const box = el('status-box');
+    box.className = 'status-box visible' + (type ? ' ' + type : '');
+    box.innerHTML = type === 'loading'
+      ? `<span class="spinner"></span>${msg}`
+      : msg;
+  }
+  function clearStatus() {
+    const box = el('status-box');
+    box.className = 'status-box';
+    box.innerHTML = '';
+  }
+
+  function riskColor(risk) {
+    const map = { Critical: '#ff5566', High: '#ff9944', Medium: '#ffcc44', Low: '#66ccff', Info: '#aaaacc' };
+    return map[risk] || '#aaaacc';
+  }
+
+  // ── Example URL ────────────────────────────────────────────────────────────
+  window.loadExample = function() {
+    el('repo-url').value =
+      'https://raw.githubusercontent.com/OpenZeppelin/openzeppelin-contracts/master/contracts/token/ERC20/ERC20.sol';
+  };
+
+  // ── Submit audit ───────────────────────────────────────────────────────────
+  window.submitAudit = async function() {
+    const repoUrl = el('repo-url').value.trim();
+    if (!repoUrl) { setStatus('Paste a GitHub URL first.', 'error'); return; }
+    el('audit-btn').disabled = true;
+    setStatus('Submitting to GenLayer validators…', 'loading');
+    el('report-section').classList.remove('visible');
+
+    try {
+      // Generate a throwaway signer key for studionet demo
+      const privateKey = '0xdeadbeef' + Math.random().toString(16).slice(2).padStart(56, '0');
+
+      const txHash = await client.writeContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'audit_contract',
+        args: [],
+        kwargs: { repo_url: repoUrl },
+      });
+
+      setStatus(`Transaction submitted: <code>${txHash}</code><br>Waiting for validator consensus…`, 'loading');
+
+      // Poll for completion
+      let attempts = 0;
+      const maxAttempts = 60;
+      const poll = async () => {
+        attempts++;
+        if (attempts > maxAttempts) {
+          setStatus('Timed out waiting for consensus. Check Studio for transaction status.', 'error');
+          el('audit-btn').disabled = false;
+          return;
+        }
+        try {
+          const receipt = await client.getTransactionReceipt(txHash);
+          if (receipt && (receipt.consensus_data?.final || receipt.status === 'FINALIZED')) {
+            setStatus('Consensus reached ✓ Loading report…', 'loading');
+            await fetchAndShowReport(repoUrl);
+            await loadHistory();
+            await loadStats();
+          } else {
+            setTimeout(poll, 3000);
+          }
+        } catch (_) {
+          setTimeout(poll, 3000);
+        }
+      };
+      poll();
+
+    } catch (err) {
+      setStatus(`Error: ${err.message || err}`, 'error');
+      el('audit-btn').disabled = false;
+    }
+  };
+
+  // ── Fetch and render report ────────────────────────────────────────────────
+  async function fetchAndShowReport(repoUrl) {
+    try {
+      const raw = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_audit',
+        args: [],
+        kwargs: { repo_url: repoUrl },
+      });
+
+      const report = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!report || !report.overall_risk) throw new Error('Empty report returned.');
+
+      renderReport(report, repoUrl);
+      clearStatus();
+      el('audit-btn').disabled = false;
+    } catch (err) {
+      setStatus(`Could not load report: ${err.message}`, 'error');
+      el('audit-btn').disabled = false;
+    }
+  }
+
+  // ── Render report ──────────────────────────────────────────────────────────
+  function renderReport(report, repoUrl) {
+    const section = el('report-section');
+
+    // Header
+    el('report-title').textContent = `${report.language} Security Audit`;
+    el('report-repo').textContent = repoUrl;
+    const riskEl = el('report-risk');
+    riskEl.textContent = report.overall_risk;
+    riskEl.className = `risk-badge risk-${report.overall_risk}`;
+
+    // Score
+    const score = parseInt(report.score) || 0;
+    el('score-number').textContent = score;
+    el('score-bar').style.width = score + '%';
+
+    // Vulnerabilities
+    const vulns = report.vulnerabilities || [];
+    el('vuln-title').textContent = `Vulnerabilities — ${vulns.length} found`;
+
+    if (vulns.length === 0) {
+      el('vuln-container').innerHTML = '<div class="no-vulns">✓ No vulnerabilities detected by the AI audit.</div>';
+    } else {
+      const sevOrder = { Critical: 0, High: 1, Medium: 2, Low: 3, Info: 4 };
+      const sorted = [...vulns].sort((a, b) => (sevOrder[a.severity] ?? 5) - (sevOrder[b.severity] ?? 5));
+      el('vuln-container').innerHTML = `<div class="vuln-list">${
+        sorted.map(v => `
+          <div class="vuln-card" style="border-left-color:${riskColor(v.severity)}">
+            <div class="vuln-top">
+              <span class="vuln-id">${v.id || ''}</span>
+              <span class="sev-badge sev-${v.severity}">${v.severity}</span>
+              <span class="vuln-cat">${v.category || ''}</span>
+            </div>
+            <div class="vuln-title">${escHtml(v.title)}</div>
+            <div class="vuln-desc">${escHtml(v.description)}</div>
+            ${v.recommendation ? `<div class="vuln-rec">${escHtml(v.recommendation)}</div>` : ''}
+          </div>
+        `).join('')
+      }</div>`;
+    }
+
+    // Summary
+    el('report-summary').textContent = report.summary || '';
+
+    // Meta grid
+    const tc = report.test_coverage || {};
+    const dc = report.documentation || {};
+    el('meta-grid').innerHTML = `
+      <div class="meta-card">
+        <div class="meta-card-label">Test Coverage</div>
+        <div class="meta-card-rating rating-${tc.rating || 'None'}">${tc.rating || 'None'}</div>
+        <div class="meta-card-notes">${escHtml(tc.notes || '')}</div>
+      </div>
+      <div class="meta-card">
+        <div class="meta-card-label">Documentation</div>
+        <div class="meta-card-rating rating-${dc.rating || 'None'}">${dc.rating || 'None'}</div>
+        <div class="meta-card-notes">${escHtml(dc.notes || '')}</div>
+      </div>
+    `;
+
+    section.classList.add('visible');
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ── Load history ───────────────────────────────────────────────────────────
+  window.loadHistory = async function() {
+    try {
+      const raw = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_all_audits',
+        args: [], kwargs: {},
+      });
+      const items = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!items || items.length === 0) {
+        el('history-container').innerHTML =
+          '<div class="history-empty">No audits yet. Submit your first contract above.</div>';
+        return;
+      }
+      el('history-container').innerHTML = `<div class="history-list">${
+        items.map(item => `
+          <div class="history-item" onclick="loadFromHistory('${escAttr(item.repo_url)}')">
+            <div class="history-risk">
+              <span class="sev-badge sev-${item.overall_risk}">${item.overall_risk}</span>
+            </div>
+            <div class="history-url">${escHtml(item.repo_url)}</div>
+            <div class="history-score">${item.score}/100</div>
+          </div>
+        `).join('')
+      }</div>`;
+    } catch (_) { /* silent */ }
+  };
+
+  window.loadFromHistory = async function(repoUrl) {
+    el('repo-url').value = repoUrl;
+    setStatus('Loading cached audit…', 'loading');
+    await fetchAndShowReport(repoUrl);
+  };
+
+  // ── Load stats ─────────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const count = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_audit_count',
+        args: [], kwargs: {},
+      });
+      el('stat-count').textContent = count || '0';
+    } catch (_) { /* silent */ }
+  }
+
+  // ── Utils ──────────────────────────────────────────────────────────────────
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  loadHistory();
+  loadStats();
+</script>
+</body>
+</html>
