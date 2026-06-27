@@ -1227,10 +1227,11 @@ YPE html>
 
 <!-- ── GenLayer JS ──────────────────────────────────────────────────────────── -->
 <script type="module">
-  import { createClient, chains } from 'https://esm.sh/genlayer-js@latest';
+  import { createClient, createAccount, chains } from 'https://esm.sh/genlayer-js@latest';
 
   // ── Client setup ──────────────────────────────────────────────────────────
-  const client = createClient({ chain: chains.studionet });
+  const account = createAccount();
+  const client = createClient({ chain: chains.studionet, account });
 
   // ── State ──────────────────────────────────────────────────────────────────
   const CONTRACT_ADDRESS = '0x3c51e970B76631Ed10a73CB3Ed5900693e362Ca7';
@@ -1271,9 +1272,6 @@ YPE html>
     el('report-section').classList.remove('visible');
 
     try {
-      // Generate a throwaway signer key for studionet demo
-      const privateKey = '0xdeadbeef' + Math.random().toString(16).slice(2).padStart(56, '0');
-
       const txHash = await client.writeContract({
         address: CONTRACT_ADDRESS,
         functionName: 'audit_contract',
@@ -1281,33 +1279,19 @@ YPE html>
         kwargs: { repo_url: repoUrl },
       });
 
-      setStatus(`Transaction submitted: <code>${txHash}</code><br>Waiting for validator consensus…`, 'loading');
+      setStatus(`Transaction submitted: <code>${txHash.slice(0,18)}…</code><br>Waiting for validator consensus…`, 'loading');
 
-      // Poll for completion
-      let attempts = 0;
-      const maxAttempts = 60;
-      const poll = async () => {
-        attempts++;
-        if (attempts > maxAttempts) {
-          setStatus('Timed out waiting for consensus. Check Studio for transaction status.', 'error');
-          el('audit-btn').disabled = false;
-          return;
-        }
-        try {
-          const receipt = await client.getTransactionReceipt(txHash);
-          if (receipt && (receipt.consensus_data?.final || receipt.status === 'FINALIZED')) {
-            setStatus('Consensus reached ✓ Loading report…', 'loading');
-            await fetchAndShowReport(repoUrl);
-            await loadHistory();
-            await loadStats();
-          } else {
-            setTimeout(poll, 3000);
-          }
-        } catch (_) {
-          setTimeout(poll, 3000);
-        }
-      };
-      poll();
+      await client.waitForTransactionReceipt({
+        hash: txHash,
+        status: 'FINALIZED',
+        retries: 100,
+        interval: 5000,
+      });
+
+      setStatus('Consensus reached ✓ Loading report…', 'loading');
+      await fetchAndShowReport(repoUrl);
+      await loadHistory();
+      await loadStats();
 
     } catch (err) {
       setStatus(`Error: ${err.message || err}`, 'error');
