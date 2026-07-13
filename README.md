@@ -1,4 +1,4 @@
-# Contract Auditor — Smart Contract Security Pre-Auditor on GenLayer
+Security Pre-Auditor on GenLayer
 
 > AI-powered security analysis of Solidity and GenLayer (Python) contracts.  
 > Validators independently fetch source code, run LLM analysis, and reach on-chain consensus via GenLayer Optimistic Democracy.
@@ -7,14 +7,15 @@
 
 ## How it works
 
-1. User submits a GitHub repo / raw file URL via the frontend
+1. User submits a GitHub repo / blob / raw file URL via the frontend
 2. The frontend calls `audit_contract(repo_url)` on the deployed intelligent contract
 3. Every GenLayer validator node independently:
-   - Fetches the contract source from `raw.githubusercontent.com`
+   - Resolves the reference to a **pinned commit SHA** via the GitHub API (`/commits/{ref}`), and — for a bare repo URL — walks the actual repository tree (`/git/trees/{sha}?recursive=1`) to pick a **verified** `.sol`/`.py` file instead of guessing a path
+   - Fetches that exact file at that exact commit from `raw.githubusercontent.com`
    - Sends it to an LLM with a structured security audit prompt
    - Returns a JSON report: vulnerabilities, severity scores, test coverage, documentation rating
-4. Validators reach consensus (non-comparative equivalence: same `overall_risk`, score within ±10 points)
-5. The finalized report is stored on-chain and rendered in the frontend
+4. Validators reach consensus — they must agree on the resolved `commit_sha` and `file_path` (the pinned revision), plus `overall_risk` and score bucket
+5. The finalized report — including the pinned commit + file — is stored on-chain and rendered in the frontend
 
 ---
 
@@ -22,11 +23,11 @@
 
 ```
 smart-contract-auditor/
-├── contract/
-│   └── security_auditor.py   ← GenLayer Intelligent Contract
+├── Contract/
+│   └── auditor.py             ← GenLayer Intelligent Contract
 ├── frontend/
-│   └── index.html            ← Single-file frontend (no build step)
-├── vercel.json               ← Vercel static deploy config
+│   └── index.html             ← Single-file frontend (no build step)
+├── vercel.json                ← Vercel static deploy config
 └── README.md
 ```
 
@@ -41,7 +42,7 @@ Go to **[https://studio.genlayer.com](https://studio.genlayer.com)**
 ### 2. Load the contract
 
 - Click **"Load Contract"**
-- Upload `contract/security_auditor.py`
+- Upload `Contract/auditor.py`
   - Or paste the code directly into the editor
 
 ### 3. Deploy
@@ -141,6 +142,23 @@ The frontend now talks directly to the GenLayer studionet node via `genlayer-js`
 
 ---
 
+## Pinned repository revision
+
+`audit_contract` never trusts a guessed file path. For every input it resolves,
+inside the nondet leader/validator functions, a concrete `(commit_sha, file_path)`
+pair via the GitHub REST API:
+
+- `raw.githubusercontent.com/.../<ref>/<path>` → resolves `<ref>` to its commit SHA
+- `github.com/.../blob/<ref>/<path>` → same, using the blob's ref
+- `github.com/<owner>/<repo>` (bare) → reads the repo's default branch HEAD SHA,
+  then lists the full tree at that commit and picks a real `.sol`/`.py` file that
+  exists in it
+
+Validators must agree on the exact `commit_sha` + `file_path`, not just the audit
+scores — so the stored report is reproducible against one immutable revision,
+not a moving branch head. The pinned commit and file are stored in the report and
+shown in the frontend, with a link to the exact file at that commit.
+
 ## GenLayer SDK note
 
 The frontend imports `genlayer-js` via ESM CDN (no build step required):
@@ -158,3 +176,4 @@ Audit submission calls `client.writeContract` → polls `getTransactionReceipt` 
 ## Disclaimer
 
 This is a **pre-audit tool** — a fast automated first-pass. It does not replace a professional manual audit before mainnet deployment.
+oading README.md…]()
