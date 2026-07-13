@@ -20,22 +20,89 @@ class SecurityAuditor(gl.Contract):
         if not repo_url:
             raise Exception("repo_url cannot be empty.")
 
-        # Build raw URL outside nondet (no self access inside nondet)
-        url = repo_url
-        if url.startswith("https://raw.githubusercontent.com"):
-            raw_url = url
-        elif "github.com" in url and "/blob/" in url:
-            raw_url = (
-                url.replace("https://github.com", "https://raw.githubusercontent.com")
-                   .replace("/blob/", "/")
-            )
-        else:
+        def resolve_commit_sha(owner: str, repo: str, ref: str) -> str:
+            resp = gl.nondet.web.get(f"https://api.github.com/repos/{owner}/{repo}/commits/{ref}")
+            data = json.loads(resp.body.decode("utf-8"))
+            if "sha" not in data:
+                raise Exception(f"Could not resolve ref '{ref}' for {owner}/{repo}.")
+            return data["sha"]
+
+        def resolve_source(url: str):
+            """
+            Resolves ANY GitHub reference (raw file / blob file / bare repo) to a
+            pinned commit SHA + a verified file path. Never guesses a path that
+            hasn't been confirmed to exist in the repository tree.
+            Returns (raw_url, owner, repo, commit_sha, file_path).
+            """
+            if url.startswith("https://raw.githubusercontent.com"):
+                parts = url.replace("https://raw.githubusercontent.com/", "").split("/")
+                if len(parts) < 4:
+                    raise Exception("Invalid raw.githubusercontent.com URL.")
+                owner, repo, ref = parts[0], parts[1], parts[2]
+                file_path = "/".join(parts[3:])
+                commit_sha = resolve_commit_sha(owner, repo, ref)
+                return (
+                    f"https://raw.githubusercontent.com/{owner}/{repo}/{commit_sha}/{file_path}",
+                    owner, repo, commit_sha, file_path,
+                )
+
+            if "github.com" in url and "/blob/" in url:
+                base = url.replace("https://github.com/", "")
+                repo_part, rest = base.split("/blob/", 1)
+                owner_repo = repo_part.split("/")
+                owner, repo = owner_repo[0], owner_repo[1]
+                rest_parts = rest.split("/", 1)
+                if len(rest_parts) < 2:
+                    raise Exception("Invalid GitHub blob URL: missing file path.")
+                ref, file_path = rest_parts[0], rest_parts[1]
+                commit_sha = resolve_commit_sha(owner, repo, ref)
+                return (
+                    f"https://raw.githubusercontent.com/{owner}/{repo}/{commit_sha}/{file_path}",
+                    owner, repo, commit_sha, file_path,
+                )
+
+            # Bare repo URL: pin the default branch HEAD, then pick a *verified*
+            # contract file from the actual repository tree at that commit.
             base = url.rstrip("/").replace("https://github.com/", "")
             parts = base.split("/")
             if len(parts) < 2:
                 raise Exception("Invalid GitHub URL.")
             owner, repo = parts[0], parts[1]
-            raw_url = f"https://raw.githubusercontent.com/{owner}/{repo}/main/contracts/{repo}.sol"
+
+            meta_resp = gl.nondet.web.get(f"https://api.github.com/repos/{owner}/{repo}")
+            meta = json.loads(meta_resp.body.decode("utf-8"))
+            default_branch = meta.get("default_branch")
+            if not default_branch:
+                raise Exception(f"Could not read repo metadata for {owner}/{repo}.")
+
+            commit_sha = resolve_commit_sha(owner, repo, default_branch)
+
+            tree_resp = gl.nondet.web.get(
+                f"https://api.github.com/repos/{owner}/{repo}/git/trees/{commit_sha}?recursive=1"
+            )
+            tree = json.loads(tree_resp.body.decode("utf-8"))
+            candidates = [
+                t["path"] for t in tree.get("tree", [])
+                if t.get("type") == "blob"
+                and t["path"].endswith((".sol", ".py"))
+                and "test" not in t["path"].lower()
+                and "node_modules" not in t["path"]
+                and "/lib/" not in t["path"]
+            ]
+            if not candidates:
+                raise Exception(
+                    f"No .sol or .py contract file found in {owner}/{repo}@{commit_sha[:7]}."
+                )
+
+            # Prefer a file whose name matches the repo; otherwise the shortest
+            # path (top-level files rank above deeply nested ones).
+            candidates.sort(key=lambda p: (repo.lower() not in p.lower(), p.count("/"), len(p)))
+            file_path = candidates[0]
+
+            return (
+                f"https://raw.githubusercontent.com/{owner}/{repo}/{commit_sha}/{file_path}",
+                owner, repo, commit_sha, file_path,
+            )
 
         PROMPT = """You are a senior smart-contract security auditor.
 Analyze the contract source code below and return ONLY a JSON object — no markdown fences, no explanation, nothing else.
@@ -72,6 +139,8 @@ Rules:
 - Output ONLY the JSON object, nothing else"""
 
         def leader_fn() -> str:
+            raw_url, owner, repo, commit_sha, file_path = resolve_source(repo_url)
+
             response = gl.nondet.web.get(raw_url)
             source = response.body.decode("utf-8")
             if not source.strip():
@@ -102,17 +171,29 @@ Rules:
             score = int(parsed["score"])
             score_bucket = (score - 1) // 20 if score > 0 else 0
 
-            # Canonical form: only fields that must agree across LLMs
+            # Canonical form: only fields that must agree across LLMs.
+            # commit_sha + file_path must match EXACTLY — this is what binds
+            # the audit to one pinned repository revision instead of a guess.
             canonical = json.dumps({
                 "language": parsed["language"],
                 "overall_risk": parsed["overall_risk"],
                 "score_bucket": score_bucket,
                 "vuln_count": len(parsed.get("vulnerabilities", [])),
+                "commit_sha": commit_sha,
+                "file_path": file_path,
             }, sort_keys=True)
+
+            full_report = {
+                **parsed,
+                "owner": owner,
+                "repo": repo,
+                "pinned_commit": commit_sha,
+                "pinned_file": file_path,
+            }
 
             return json.dumps({
                 "canonical": canonical,
-                "report": json.dumps(parsed, sort_keys=True),
+                "report": json.dumps(full_report, sort_keys=True),
             }, sort_keys=True)
 
         def validator_fn(leader_result) -> bool:
@@ -122,9 +203,12 @@ Rules:
                 validator_output = leader_fn()
                 lc = json.loads(json.loads(leader_result.calldata)["canonical"])
                 vc = json.loads(json.loads(validator_output)["canonical"])
-                # Must agree on language, overall_risk, and score bucket
+                # Must agree on the exact pinned revision, plus language,
+                # overall_risk, and score bucket.
                 return (
-                    lc["language"] == vc["language"]
+                    lc["commit_sha"] == vc["commit_sha"]
+                    and lc["file_path"] == vc["file_path"]
+                    and lc["language"] == vc["language"]
                     and lc["overall_risk"] == vc["overall_risk"]
                     and abs(lc["score_bucket"] - vc["score_bucket"]) <= 1
                 )
@@ -174,7 +258,10 @@ Rules:
                     "overall_risk": report.get("overall_risk", "?"),
                     "score": report.get("score", 0),
                     "language": report.get("language", "?"),
+                    "pinned_commit": report.get("pinned_commit", "?"),
+                    "pinned_file": report.get("pinned_file", "?"),
                 })
             except Exception:
                 summaries.append({"repo_url": url, "overall_risk": "?", "score": 0, "language": "?"})
         return json.dumps(summaries)
+
