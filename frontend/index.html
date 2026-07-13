@@ -1135,6 +1135,17 @@ YPE html>
     <div class="section-label">01 — Submit Contract</div>
     <div class="form-card">
 
+      <!-- Contract address row -->
+      <label>GenLayer Contract Address</label>
+      <div class="form-row">
+        <div class="input-group">
+          <input type="text" id="contract-address"
+            placeholder="0x..." />
+        </div>
+        <button class="btn btn-ghost" onclick="saveContractAddress()">Save</button>
+      </div>
+      <div class="status-box" id="address-status"></div>
+
       <!-- Audit row -->
       <label>GitHub Repository or Contract File URL</label>
       <div class="form-row">
@@ -1182,6 +1193,9 @@ YPE html>
         <div class="score-meta" id="score-meta">Higher = more secure · 0–100</div>
       </div>
     </div>
+
+    <!-- Pinned revision -->
+    <div class="status-box visible" id="pinned-info" style="font-family:var(--mono);font-size:12px;"></div>
 
     <!-- Summary -->
     <div class="summary-block" id="report-summary"></div>
@@ -1234,10 +1248,30 @@ YPE html>
   const client = createClient({ chain: chains.studionet, account });
 
   // ── State ──────────────────────────────────────────────────────────────────
-  const CONTRACT_ADDRESS = '0x3c51e970B76631Ed10a73CB3Ed5900693e362Ca7';
+  // Fallback default — MUST be replaced with the address you get after
+  // deploying Contract/auditor.py in GenLayer Studio. The field below lets
+  // anyone testing this frontend point it at their own deployment.
+  const DEFAULT_CONTRACT_ADDRESS = '0xf52f4D08C05A6Ea66865FC2491108c136975bDD';
+  let CONTRACT_ADDRESS = localStorage.getItem('genlayer_contract_address') || DEFAULT_CONTRACT_ADDRESS;
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   function el(id) { return document.getElementById(id); }
+
+  window.saveContractAddress = function() {
+    const addr = el('contract-address').value.trim();
+    const box = el('address-status');
+    if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) {
+      box.className = 'status-box visible error';
+      box.textContent = 'Not a valid address (expected 0x + 40 hex chars).';
+      return;
+    }
+    CONTRACT_ADDRESS = addr;
+    localStorage.setItem('genlayer_contract_address', addr);
+    box.className = 'status-box visible success';
+    box.textContent = `Saved. Now calling contract at ${addr}.`;
+    loadHistory();
+    loadStats();
+  };
 
   function setStatus(msg, type = '') {
     const box = el('status-box');
@@ -1362,6 +1396,15 @@ YPE html>
       }</div>`;
     }
 
+    // Pinned revision (proves the audit is bound to one exact commit + file,
+    // not a guessed path or an unpinned branch head)
+    if (report.pinned_commit && report.owner) {
+      el('pinned-info').innerHTML =
+        `Pinned revision: <a href="https://github.com/${report.owner}/${report.repo}/blob/${report.pinned_commit}/${report.pinned_file}" target="_blank" style="color:var(--accent)">${report.owner}/${report.repo}@${report.pinned_commit.slice(0,7)} · ${report.pinned_file}</a>`;
+    } else {
+      el('pinned-info').textContent = '';
+    }
+
     // Summary
     el('report-summary').textContent = report.summary || '';
 
@@ -1410,7 +1453,10 @@ YPE html>
           </div>
         `).join('')
       }</div>`;
-    } catch (_) { /* silent */ }
+    } catch (err) {
+      el('history-container').innerHTML =
+        `<div class="history-empty" style="color:var(--critical)">Could not read from contract ${CONTRACT_ADDRESS}: ${err.message || err}. Check the address above.</div>`;
+    }
   };
 
   window.loadFromHistory = async function(repoUrl) {
@@ -1428,7 +1474,10 @@ YPE html>
         args: [], kwargs: {},
       });
       el('stat-count').textContent = count || '0';
-    } catch (_) { /* silent */ }
+    } catch (err) {
+      el('stat-count').textContent = 'err';
+      el('stat-count').title = err.message || String(err);
+    }
   }
 
   // ── Utils ──────────────────────────────────────────────────────────────────
@@ -1438,8 +1487,10 @@ YPE html>
   function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
 
   // ── Init ───────────────────────────────────────────────────────────────────
+  el('contract-address').value = CONTRACT_ADDRESS;
   loadHistory();
   loadStats();
 </script>
 </body>
 </html>
+
