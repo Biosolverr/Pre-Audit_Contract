@@ -1,7 +1,6 @@
 # { "Depends": "py-genlayer:1jb45aa8ynh2a9c9xn3b7qqh8sm5q93hwfp7jqmwsfhh8jpz09h6" }
 from genlayer import *
 import json
-import re
 
 
 class SecurityAuditor(gl.Contract):
@@ -9,26 +8,11 @@ class SecurityAuditor(gl.Contract):
     audits: TreeMap[str, str]
     audit_count: u256
     audit_index: TreeMap[str, str]
-    owner: Address
-    github_token: str
 
     def __init__(self) -> None:
         self.audits = TreeMap()
         self.audit_count = u256(0)
         self.audit_index = TreeMap()
-        self.owner = gl.message.sender_address
-        self.github_token = ""
-
-    @gl.public.write
-    def set_github_token(self, token: str) -> None:
-        # Owner-only: raises the unauthenticated GitHub API limit (60/hr per IP —
-        # shared across ALL studionet validators) to 5000/hr for this contract's
-        # calls. NOTE: this is a public chain — anyone can read contract state,
-        # so this is NOT a real secret. Use a fine-grained PAT with read-only
-        # public-repo access, nothing else, and rotate it if you're unsure.
-        if gl.message.sender_address != self.owner:
-            raise Exception("Only the contract owner can set the GitHub token.")
-        self.github_token = token.strip()
 
     @gl.public.write
     def audit_contract(self, repo_url: str) -> None:
@@ -36,16 +20,10 @@ class SecurityAuditor(gl.Contract):
         if not repo_url:
             raise Exception("repo_url cannot be empty.")
 
-        # Storage is inaccessible inside nondet blocks, so read it into a plain
-        # local variable here, before leader_fn/validator_fn are defined below.
-        github_token = self.github_token
-
         GITHUB_HEADERS = {
             "User-Agent": "GenLayer-SecurityAuditor",
             "Accept": "application/vnd.github+json",
         }
-        if github_token:
-            GITHUB_HEADERS["Authorization"] = f"Bearer {github_token}"
 
         def github_api_get(url: str) -> dict:
             resp = gl.nondet.web.get(url, headers=GITHUB_HEADERS)
@@ -61,9 +39,6 @@ class SecurityAuditor(gl.Contract):
             return data
 
         def resolve_commit_sha(owner: str, repo: str, ref: str) -> str:
-            # Already a pinned commit SHA — nothing to resolve, no API call needed.
-            if re.fullmatch(r"[0-9a-fA-F]{40}", ref):
-                return ref.lower()
             # "HEAD" resolves to whatever the repo's default branch currently is,
             # in a single call — avoids a separate /repos/{owner}/{repo} lookup.
             data = github_api_get(f"https://api.github.com/repos/{owner}/{repo}/commits/{ref}")
@@ -309,3 +284,4 @@ Rules:
             except Exception:
                 summaries.append({"repo_url": url, "overall_risk": "?", "score": 0, "language": "?"})
         return json.dumps(summaries)
+
