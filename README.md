@@ -173,7 +173,47 @@ Audit submission calls `client.writeContract` → polls `getTransactionReceipt` 
 
 ---
 
+## New contract methods
+
+| Method | Type | Purpose |
+|--------|------|---------|
+| `get_audit_trend` | view | Per-repo history of `{seq, score, overall_risk}` across re-audits (last 20) |
+| `get_audit_stats` | view | Aggregate totals: audit count, unique repos, risk-level distribution, top vulnerability categories |
+| `get_all_audits(limit)` | view | Now deduplicated by repo (a re-audited repo appears once, at its most recent position) and depth-capped, so it can't turn into an unbounded scan as history grows. Existing calls with no `limit` still work — defaults to 50 |
+
+## Security fixes (July 2026 review)
+
+- **Prompt injection**: the audited source is now wrapped in explicit `<source_code>` markers with an instruction to the LLM to treat it strictly as data, never as commands — and to flag any embedded injection attempt as its own "Prompt Injection Attempt" finding.
+- **Consensus granularity**: `validator_fn` now also requires agreement on `vuln_count` (within tolerance) — this field was already collected but never actually checked.
+- **URL validation**: `resolve_source` now rejects anything that isn't an exact `https://github.com/` or `https://raw.githubusercontent.com/` prefix, closing a domain-confusion edge case (e.g. `raw.githubusercontent.com.evil.com`) and giving a clean error for non-GitHub URLs instead of falling through to the bare-repo branch.
+- **`get_all_audits` DoS**: bounded to a hard scan-depth ceiling regardless of total audit count (previously unbounded).
+- **Duplicate history entries**: re-auditing the same repo no longer produces duplicate rows in `get_all_audits`.
+- **Frontend XSS**: the history list is now built with DOM APIs instead of `innerHTML` + string interpolation inside an `onclick` attribute, which could previously be broken out of with a crafted `repo_url` containing a double quote. The pinned-revision link is now consistently HTML-escaped like the rest of the report.
+- **Duplicate document bug**: the shipped `frontend/index.html` had an accidental second `<!DOCTYPE html><html><head>...` block spliced into the middle of the form, and a duplicated `id="stat-count"` element — meaning the visible "audits on-chain" counter was silently bound to the wrong, invisible element. The file is now a single well-formed document.
+- `github_token` remaining in plaintext contract state is a known, intentional tradeoff (documented in `Contract/auditor.py`) — GenLayer is a public chain, so there's no way to raise GitHub's rate limit from a contract without exposing *some* credential to on-chain reads. Use a read-only, public-repo-scoped token.
+
+## New frontend features
+
+- **Score trend** — per-repo chart under each report (`get_audit_trend`), showing how score/risk changed across re-audits.
+- **Aggregate stats dashboard** — total audits, unique repos, risk-level distribution, and most common vulnerability categories (`get_audit_stats`), shown as its own section.
+- **Filter/search on history** — filter the on-chain audit list by risk level or search by URL, client-side.
+- **Export report** — download any report as JSON or Markdown.
+- **Embeddable badge** — generates an SVG score badge + a Markdown snippet to paste into the audited repo's own README.
+- **Permalink** — `?repo=<url>&contract=<address>` in the frontend URL auto-loads that contract/report on page load.
+
+## Second pass (post-live-testing)
+
+Found by running the actual test protocol above against a live Studio deployment:
+
+- **Category vocabulary drift**: the same finding ("owner changeable via `tx.origin`") came back tagged `"Access Control"` in one run and `"Authorization"` in another — free-text categories fragment `get_audit_stats.top_categories`. Fixed: the LLM must now pick from a fixed `VULN_CATEGORIES` list; anything off-list is normalized to `"Other"` as a fallback.
+- **Cross-sender re-audit spam**: `set_github_token` is now live with a real credential attached, so unrestricted re-audits burn the owner's personal GitHub quota. Fixed with a **sender-aware cooldown**: re-auditing your *own* previous submission is always instant (doesn't break iterative testing), but a *different* address re-auditing someone else's just-submitted repo has to wait `MIN_REAUDIT_GAP` (2) other audits first.
+- **`repo_url` fragmentation**: trailing slash / `.git` suffix variants of the same URL were treated as different keys. Fixed with `_normalize_repo_url()`, applied consistently on write and on every read (`get_audit`, `get_audit_trend`).
+- **Bare-repo file selection picked a small/unrepresentative file** (observed live: `openzeppelin-contracts` resolved to a small `RLP.sol` utility instead of a more central contract). Sort order now also prefers the larger file (by GitHub tree API `size`) as a tertiary key, after name-match and path depth.
+- **Score precision**: consensus tolerates a ±1 score-bucket disagreement (a bucket is 20 points wide), so an exact-looking number like `55/100` can hide real spread between validators. Frontend now says so next to the score.
+- **Frontend couldn't tell you *why* an audit failed** (UNDETERMINED vs. revert vs. still finalizing) — it just said "no report found." Now distinguishes UNDETERMINED (validators' AI disagreed too much), the ACCEPTED→FINALIZED transition (shown as expected, not stuck), and the anti-spam cooldown message from the contract, in the status text.
+
+
+
 ## Disclaimer
 
 This is a **pre-audit tool** — a fast automated first-pass. It does not replace a professional manual audit before mainnet deployment.
-oading README.md…]()
