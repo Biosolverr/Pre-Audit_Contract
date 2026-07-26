@@ -663,6 +663,10 @@
       </div>
 
       <div class="status-box" id="status-box"></div>
+      <div id="last-tx-box" style="display:none;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim);">
+        Last transaction: <code id="last-tx-hash" style="color:var(--muted);user-select:all;"></code>
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px;margin-left:6px;" onclick="navigator.clipboard.writeText(el('last-tx-hash').textContent)">copy</button>
+      </div>
     </div>
   </div>
 </section>
@@ -876,6 +880,9 @@
         args: [],
         kwargs: { repo_url: repoUrl },
       });
+
+      el('last-tx-hash').textContent = txHash;
+      el('last-tx-box').style.display = 'block';
 
       // GenLayer transactions pass through ACCEPTED (leader + validators
       // agreed, still inside the appeal/finality window) before FINALIZED.
