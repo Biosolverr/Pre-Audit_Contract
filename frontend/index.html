@@ -508,574 +508,71 @@
     .footer-link { color: var(--muted); text-decoration: none; }
     .footer-link:hover { color: var(--accent); }
 
-    /* ── Responsive ──────────────────────────────────────────────────────── */
-    @media (max-width: 600px) {
-      .meta-grid { grid-template-columns: 1fr; }
-      .score-block { gap: 16px; }
-      .score-number { font-size: 36px; }
-      .hero { padding: 48px 0 36px; }
-    }
-  </style>
-</head>
-<body>
-
-<!-- ── Header ──────────────────────────────────────────────────────────────── -->
-<header>
-  <div class="container">
-    <div class="logo">
-      <div class="logo-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      </div>
-      <div class="logo-text">Contract<span>Auditor</span></div>
-    </div>
-    <div class="header-badge">Powered by GenLayer</div>
-  </div>
-</header>
-
-<!-- ── Hero ────────────────────────────────────────────────────────────────── -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-eyebrow">AI Security Analysis · On-Chain Consensus</div>
-    <h1>Smart Contract <strong>Security Pre-Audit</strong><br>powered by decentralized AI</h1>
-    <p class="hero-desc">
-      Submit any GitHub contract repository. GenLayer validators independently fetch the source,
-      run LLM-powered security analysis, and reach on-chain consensus — no oracles, no middlemen.
-    </p>
-    <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-value" id="stat-count">—</div>
-        <div class="stat-label">audits on-chain</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">5+</div>
-        <div class="stat-label">vuln categories</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value">AI</div>
-        <div class="stat-label">consensus nodes</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ── Audit Form ───────────────────────────────────────────────────────────── -->
-<section class="audit-section">
-  <div class="container">
-    <div class="section-label">01 — Submit Contract</div>
-    <div class="form-card">
-
-      <!-- Contract address row -->
-YPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contract Auditor — AI Security Pre-Audit on GenLayer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    /* ── Tokens ──────────────────────────────────────────────────────────── */
-    :root {
-      --bg:        #0a0a0b;
-      --surface:   #111114;
-      --surface2:  #18181d;
-      --border:    #252530;
-      --border2:   #32323f;
-      --text:      #e8e8f0;
-      --muted:     #7a7a8c;
-      --dim:       #4a4a5a;
-      --accent:    #c8f0d0;    /* cold mint — security / safe */
-      --accent2:   #8be0a0;
-      --critical:  #ff5566;
-      --high:      #ff9944;
-      --medium:    #ffcc44;
-      --low:       #66ccff;
-      --info:      #aaaacc;
-      --good:      #66dd88;
-      --mono:      'IBM Plex Mono', monospace;
-      --sans:      'Inter', system-ui, sans-serif;
-    }
-
-    /* ── Reset ───────────────────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-size: 16px; scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-weight: 400;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
-
-    /* ── Layout ──────────────────────────────────────────────────────────── */
-    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
-
-    /* ── Header ──────────────────────────────────────────────────────────── */
-    header {
-      border-bottom: 1px solid var(--border);
-      padding: 20px 0 18px;
-    }
-    header .container {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      justify-content: space-between;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-icon {
-      width: 32px; height: 32px;
-      background: var(--accent);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .logo-icon svg { color: var(--bg); }
-    .logo-text {
-      font-family: var(--mono);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      letter-spacing: 0.02em;
-    }
-    .logo-text span { color: var(--accent); }
-    .header-badge {
+    /* ── New: trend / export / badge / filters / stats ──────────────────────── */
+    .subsection-label {
       font-family: var(--mono);
       font-size: 11px;
       color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 3px 10px;
-      border-radius: 4px;
-      letter-spacing: 0.04em;
-    }
-
-    /* ── Hero ────────────────────────────────────────────────────────────── */
-    .hero {
-      padding: 72px 0 56px;
-      border-bottom: 1px solid var(--border);
-    }
-    .hero-eyebrow {
-      font-family: var(--mono);
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--accent);
-      letter-spacing: 0.12em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 20px;
+      margin: 24px 0 12px;
     }
-    .hero h1 {
-      font-size: clamp(28px, 5vw, 48px);
-      font-weight: 300;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      max-width: 680px;
-      margin-bottom: 20px;
-    }
-    .hero h1 strong {
-      font-weight: 600;
-      color: #fff;
-    }
-    .hero-desc {
-      font-size: 15px;
-      color: var(--muted);
-      max-width: 560px;
-      line-height: 1.7;
-      margin-bottom: 40px;
-    }
-
-    /* Stat row */
-    .hero-stats {
-      display: flex;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-    .stat {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-    .stat-value {
-      font-family: var(--mono);
-      font-size: 22px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .stat-label {
-      font-size: 12px;
-      color: var(--dim);
-      font-family: var(--mono);
-      letter-spacing: 0.04em;
-    }
-
-    /* ── Audit Form ──────────────────────────────────────────────────────── */
-    .audit-section { padding: 56px 0; border-bottom: 1px solid var(--border); }
-    .section-label {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 24px;
-    }
-
-    .form-card {
+    .trend-box {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 28px;
+      padding: 16px;
+      min-height: 40px;
+      margin-bottom: 24px;
     }
-    .form-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .input-group { flex: 1; min-width: 260px; }
-    label {
-      display: block;
-      font-size: 12px;
-      color: var(--muted);
-      font-family: var(--mono);
-      margin-bottom: 8px;
-      letter-spacing: 0.04em;
-    }
-    input[type="text"] {
+    .trend-row { display: flex; align-items: flex-end; gap: 6px; height: 64px; }
+    .trend-point { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; flex: 1; min-width: 8px; }
+    .trend-bar { width: 100%; border-radius: 2px 2px 0 0; min-width: 6px; }
+    .trend-score { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+    .report-tools { display: flex; gap: 24px; flex-wrap: wrap; margin-bottom: 20px; }
+    .report-tools-col { flex: 1; min-width: 220px; }
+    .badge-embed {
       width: 100%;
       background: var(--surface2);
       border: 1px solid var(--border2);
       border-radius: 5px;
-      padding: 11px 14px;
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-    input[type="text"]::placeholder { color: var(--dim); }
-    input[type="text"]:focus { border-color: var(--accent); }
-    input[type="text"]:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 11px 22px;
-      border-radius: 5px;
-      border: none;
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-      white-space: nowrap;
-    }
-    .btn:active { transform: scale(0.98); }
-    .btn-primary {
-      background: var(--accent);
-      color: var(--bg);
-    }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-    .btn-ghost {
-      background: var(--surface2);
-      color: var(--muted);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
-    .btn-icon { font-size: 15px; }
-    .btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
-
-    /* Status / progress */
-    .status-box {
-      margin-top: 20px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 14px 16px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-      display: none;
-    }
-    .status-box.visible { display: block; }
-    .status-box.error { border-color: var(--critical); color: var(--critical); background: rgba(255,85,102,0.06); }
-    .status-box.success { border-color: var(--good); color: var(--good); background: rgba(102,221,136,0.06); }
-
-    .spinner {
-      display: inline-block;
-      width: 10px; height: 10px;
-      border: 2px solid var(--border2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      vertical-align: middle;
-      margin-right: 8px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Report ──────────────────────────────────────────────────────────── */
-    .report-section {
-      padding: 56px 0;
-      border-bottom: 1px solid var(--border);
-      display: none;
-    }
-    .report-section.visible { display: block; }
-
-    .report-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 32px;
-      flex-wrap: wrap;
-    }
-    .report-title { font-size: 20px; font-weight: 500; color: #fff; margin-bottom: 6px; }
-    .report-repo {
+      padding: 8px 10px;
       font-family: var(--mono);
       font-size: 11px;
       color: var(--muted);
-      word-break: break-all;
+      resize: vertical;
+      min-height: 44px;
     }
 
-    /* Risk badge */
-    .risk-badge {
-      padding: 6px 16px;
-      border-radius: 4px;
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      flex-shrink: 0;
+    .history-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+    .history-controls input[type="text"] {
+      flex: 1; min-width: 220px;
+      background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px;
+      padding: 9px 12px; font-family: var(--mono); font-size: 12px; color: var(--text); outline: none;
     }
-    .risk-Critical { background: rgba(255,85,102,0.15); color: var(--critical); border: 1px solid rgba(255,85,102,0.3); }
-    .risk-High     { background: rgba(255,153,68,0.15); color: var(--high);     border: 1px solid rgba(255,153,68,0.3); }
-    .risk-Medium   { background: rgba(255,204,68,0.12); color: var(--medium);   border: 1px solid rgba(255,204,68,0.3); }
-    .risk-Low      { background: rgba(102,204,255,0.12); color: var(--low);     border: 1px solid rgba(102,204,255,0.3); }
-    .risk-Info     { background: rgba(170,170,204,0.12); color: var(--info);    border: 1px solid rgba(170,170,204,0.3); }
-
-    /* Score meter */
-    .score-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 22px 24px;
-      margin-bottom: 24px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      flex-wrap: wrap;
-    }
-    .score-number {
-      font-family: var(--mono);
-      font-size: 48px;
-      font-weight: 600;
-      line-height: 1;
-      color: #fff;
-      min-width: 80px;
-    }
-    .score-bar-wrap { flex: 1; min-width: 200px; }
-    .score-bar-label { font-size: 12px; color: var(--muted); font-family: var(--mono); margin-bottom: 8px; }
-    .score-bar-track {
-      height: 6px;
-      background: var(--surface2);
-      border-radius: 3px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .score-bar-fill {
-      height: 100%;
-      border-radius: 3px;
-      background: linear-gradient(90deg, var(--critical) 0%, var(--medium) 40%, var(--good) 80%);
-      transition: width 0.6s ease;
-    }
-    .score-meta {
-      font-size: 11px;
-      color: var(--dim);
-      font-family: var(--mono);
-      margin-top: 6px;
+    .history-controls select {
+      background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px;
+      padding: 9px 12px; font-family: var(--mono); font-size: 12px; color: var(--text); outline: none;
     }
 
-    /* Summary */
-    .summary-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 20px 24px;
-      margin-bottom: 24px;
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.75;
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 18px; text-align: center; }
+    .stat-card-value { font-family: var(--mono); font-size: 26px; font-weight: 600; color: #fff; }
+    .stat-card-label { font-size: 11px; color: var(--dim); font-family: var(--mono); margin-top: 4px; }
+    .stat-bars { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .stat-bar-row { display: flex; align-items: center; gap: 10px; }
+    .stat-bar-label { width: 64px; font-family: var(--mono); font-size: 11px; color: var(--muted); flex-shrink: 0; }
+    .stat-bar-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
+    .stat-bar-fill { height: 100%; border-radius: 5px; transition: width 0.3s; }
+    .stat-bar-count { width: 28px; text-align: right; font-family: var(--mono); font-size: 11px; color: var(--dim); }
+    .cat-title { font-family: var(--mono); font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+    .cat-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cat-chip {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      padding: 6px 12px; font-family: var(--mono); font-size: 11px; color: var(--muted);
     }
-
-    /* Vuln grid */
-    .vuln-section-title {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-    .vuln-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-    .vuln-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 16px 18px;
-      border-left-width: 3px;
-    }
-    .vuln-top { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
-    .vuln-id {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--dim);
-      letter-spacing: 0.06em;
-    }
-    .sev-badge {
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      padding: 2px 8px;
-      border-radius: 3px;
-      text-transform: uppercase;
-    }
-    .sev-Critical { background: rgba(255,85,102,0.15); color: var(--critical); }
-    .sev-High     { background: rgba(255,153,68,0.15); color: var(--high); }
-    .sev-Medium   { background: rgba(255,204,68,0.12); color: var(--medium); }
-    .sev-Low      { background: rgba(102,204,255,0.12); color: var(--low); }
-    .sev-Info     { background: rgba(170,170,204,0.12); color: var(--info); }
-
-    .vuln-cat {
-      font-size: 11px;
-      color: var(--dim);
-      font-family: var(--mono);
-    }
-    .vuln-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
-    .vuln-desc  { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 8px; }
-    .vuln-rec   {
-      font-size: 12px;
-      color: var(--accent);
-      font-family: var(--mono);
-      background: rgba(200,240,208,0.05);
-      border: 1px solid rgba(200,240,208,0.1);
-      border-radius: 4px;
-      padding: 8px 12px;
-      line-height: 1.6;
-    }
-    .vuln-rec::before { content: '→  '; opacity: 0.5; }
-
-    /* no vulns */
-    .no-vulns {
-      text-align: center;
-      padding: 32px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--good);
-      margin-bottom: 28px;
-    }
-
-    /* Coverage / Docs */
-    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
-    .meta-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 16px 18px;
-    }
-    .meta-card-label { font-family: var(--mono); font-size: 10px; color: var(--dim); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
-    .meta-card-rating {
-      font-family: var(--mono);
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    .rating-Good    { color: var(--good); }
-    .rating-Partial { color: var(--medium); }
-    .rating-Minimal { color: var(--high); }
-    .rating-None    { color: var(--critical); }
-    .meta-card-notes { font-size: 12px; color: var(--muted); line-height: 1.6; }
-
-    /* Powered by */
-    .powered {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 16px;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--dim);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .powered span { color: var(--accent); }
-
-    /* ── History ─────────────────────────────────────────────────────────── */
-    .history-section { padding: 56px 0; }
-    .history-empty {
-      padding: 32px;
-      text-align: center;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--dim);
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-    }
-    .history-list { display: flex; flex-direction: column; gap: 8px; }
-    .history-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 16px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-      flex-wrap: wrap;
-    }
-    .history-item:hover { border-color: var(--border2); }
-    .history-risk { flex-shrink: 0; }
-    .history-url {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-      flex: 1;
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .history-score {
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--dim);
-      flex-shrink: 0;
-    }
-
-    /* ── Footer ──────────────────────────────────────────────────────────── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 28px 0;
-    }
-    footer .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .footer-text { font-size: 12px; color: var(--dim); font-family: var(--mono); }
-    .footer-link { color: var(--muted); text-decoration: none; }
-    .footer-link:hover { color: var(--accent); }
+    .cat-chip span { color: var(--text); font-weight: 600; margin-left: 4px; }
 
     /* ── Responsive ──────────────────────────────────────────────────────── */
     @media (max-width: 600px) {
@@ -1083,6 +580,7 @@ YPE html>
       .score-block { gap: 16px; }
       .score-number { font-size: 36px; }
       .hero { padding: 48px 0 36px; }
+      .stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -1190,7 +688,7 @@ YPE html>
         <div class="score-bar-track">
           <div class="score-bar-fill" id="score-bar" style="width:0%"></div>
         </div>
-        <div class="score-meta" id="score-meta">Higher = more secure · 0–100</div>
+        <div class="score-meta" id="score-meta">Higher = more secure · 0–100 · validators only need to agree within a ±20pt band, so treat this as an estimate, not an exact number</div>
       </div>
     </div>
 
@@ -1207,6 +705,25 @@ YPE html>
     <!-- Meta -->
     <div class="meta-grid" id="meta-grid"></div>
 
+    <!-- Score trend for this repo (new: get_audit_trend) -->
+    <div class="subsection-label">Score trend for this repo</div>
+    <div id="trend-box" class="trend-box"></div>
+
+    <!-- Export + badge (new, client-side only) -->
+    <div class="report-tools">
+      <div class="report-tools-col">
+        <div class="subsection-label">Export</div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="export-json-btn">⤓ JSON</button>
+          <button class="btn btn-ghost" id="export-md-btn">⤓ Markdown</button>
+        </div>
+      </div>
+      <div class="report-tools-col">
+        <div class="subsection-label">Embed badge</div>
+        <div id="badge-box"></div>
+      </div>
+    </div>
+
     <!-- Powered by -->
     <div class="powered">
       <span>✓</span> Consensus reached via <span>GenLayer Optimistic Democracy</span> — results verified by multiple AI validators on-chain.
@@ -1218,11 +735,34 @@ YPE html>
 <section class="history-section">
   <div class="container">
     <div class="section-label">03 — On-Chain Audit History</div>
+
+    <div class="history-controls">
+      <input type="text" id="history-search" placeholder="Filter by URL…" oninput="applyHistoryFilter()" />
+      <select id="history-risk-filter" onchange="applyHistoryFilter()">
+        <option value="all">All risk levels</option>
+        <option value="Critical">Critical</option>
+        <option value="High">High</option>
+        <option value="Medium">Medium</option>
+        <option value="Low">Low</option>
+        <option value="Info">Info</option>
+      </select>
+    </div>
+
     <div id="history-container">
       <div class="history-empty">No audits yet. Submit your first contract above.</div>
     </div>
     <div style="text-align:center;margin-top:16px;">
       <button class="btn btn-ghost" onclick="loadHistory()">↺ Refresh</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Aggregate stats ──────────────────────────────────────────────────────── -->
+<section class="history-section">
+  <div class="container">
+    <div class="section-label">04 — Aggregate Stats</div>
+    <div id="stats-dashboard">
+      <div class="history-empty">Loading…</div>
     </div>
   </div>
 </section>
@@ -1251,7 +791,7 @@ YPE html>
   // Fallback default — MUST be replaced with the address you get after
   // deploying Contract/auditor.py in GenLayer Studio. The field below lets
   // anyone testing this frontend point it at their own deployment.
-  const DEFAULT_CONTRACT_ADDRESS = '0xd222ED82E5d5F2631891eB5bcC0b0ECbDeF6344d';
+  const DEFAULT_CONTRACT_ADDRESS = '0x78297e3128e3d4B997C08eC3a0277055Ea088eE4';
   let CONTRACT_ADDRESS = localStorage.getItem('genlayer_contract_address') || DEFAULT_CONTRACT_ADDRESS;
 
   // ── Helpers ────────────────────────────────────────────────────────────────
@@ -1313,7 +853,15 @@ YPE html>
         kwargs: { repo_url: repoUrl },
       });
 
-      setStatus(`Transaction submitted: <code>${txHash.slice(0,18)}…</code><br>Waiting for validator consensus…`, 'loading');
+      // GenLayer transactions pass through ACCEPTED (leader + validators
+      // agreed, still inside the appeal/finality window) before FINALIZED.
+      // That's expected, not stuck — the LLM audit itself is usually already
+      // done by the time you see ACCEPTED.
+      setStatus(
+        `Transaction submitted: <code>${txHash.slice(0,18)}…</code><br>` +
+        `Waiting for validator consensus… (may pass through <code>ACCEPTED</code> before <code>FINALIZED</code> — that's normal)`,
+        'loading'
+      );
 
       await client.waitForTransactionReceipt({
         hash: txHash,
@@ -1328,7 +876,21 @@ YPE html>
       await loadStats();
 
     } catch (err) {
-      setStatus(`Error: ${err.message || err}`, 'error');
+      const raw = err.message || String(err);
+      let msg = raw;
+      if (/undetermined/i.test(raw)) {
+        msg = 'Validators could not reach consensus on this file (UNDETERMINED) — ' +
+              'their AI analyses disagreed too much (e.g. on severity or vulnerability ' +
+              'count). This can happen on ambiguous or truncated source files. Try a ' +
+              'different file, or re-submit — LLM output varies between runs.';
+      } else if (/cooldown|anti-spam/i.test(raw)) {
+        msg = raw; // already a clear message from the contract
+      } else if (/timeout|retries exhausted/i.test(raw)) {
+        msg = 'Still waiting for finalization after the wait timeout — this doesn\'t ' +
+              'necessarily mean it failed. Check the transaction in the Studio explorer; ' +
+              'if it shows ACCEPTED or FINALIZED there, reload this page and search history.';
+      }
+      setStatus(`Error: ${msg}`, 'error');
       el('audit-btn').disabled = false;
     }
   };
@@ -1345,10 +907,11 @@ YPE html>
 
       if (!raw) {
         throw new Error(
-          'No report found for this URL. The audit_contract transaction ' +
-          'finalized, but likely errored on the validator side (e.g. GitHub ' +
-          'rate limiting, or no matching .sol/.py file found) — check the ' +
-          'transaction in the Studio explorer for the real error.'
+          'No report found for this URL. Most likely cause: the validators could ' +
+          'not reach consensus (UNDETERMINED — their AI analyses disagreed too ' +
+          'much), or the transaction reverted (e.g. GitHub rate limiting, no ' +
+          'matching .sol/.py file found, anti-spam cooldown). Check the transaction ' +
+          'in the Studio explorer for the exact status and error.'
         );
       }
 
@@ -1360,9 +923,9 @@ YPE html>
       el('audit-btn').disabled = false;
     } catch (err) {
       const msg = (err.message && err.message.includes('Unexpected end of JSON'))
-        ? 'No report found for this URL. The audit_contract transaction likely ' +
-          'errored on the validator side — check the transaction in the Studio ' +
-          'explorer for the real error (e.g. GitHub rate limit, no matching file).'
+        ? 'No report found for this URL. Most likely cause: the validators could not ' +
+          'reach consensus (UNDETERMINED), or the transaction reverted — check the ' +
+          'transaction in the Studio explorer for the exact status and error.'
         : (err.message || String(err));
       setStatus(`Could not load report: ${msg}`, 'error');
       el('audit-btn').disabled = false;
@@ -1413,11 +976,18 @@ YPE html>
     // Pinned revision (proves the audit is bound to one exact commit + file,
     // not a guessed path or an unpinned branch head)
     if (report.pinned_commit && report.owner) {
+      const href = `https://github.com/${encodeURIComponent(report.owner)}/${encodeURIComponent(report.repo)}/blob/${encodeURIComponent(report.pinned_commit)}/${report.pinned_file.split('/').map(encodeURIComponent).join('/')}`;
       el('pinned-info').innerHTML =
-        `Pinned revision: <a href="https://github.com/${report.owner}/${report.repo}/blob/${report.pinned_commit}/${report.pinned_file}" target="_blank" style="color:var(--accent)">${report.owner}/${report.repo}@${report.pinned_commit.slice(0,7)} · ${report.pinned_file}</a>`;
+        `Pinned revision: <a href="${escHtml(href)}" target="_blank" style="color:var(--accent)">${escHtml(report.owner)}/${escHtml(report.repo)}@${escHtml(report.pinned_commit.slice(0,7))} · ${escHtml(report.pinned_file)}</a>`;
     } else {
       el('pinned-info').textContent = '';
     }
+
+    // Trend + badge + export (additive — pure client-side / new view calls)
+    renderBadge(report, repoUrl);
+    loadTrend(repoUrl);
+    el('export-json-btn').onclick = () => downloadReport(report, repoUrl, 'json');
+    el('export-md-btn').onclick = () => downloadReport(report, repoUrl, 'md');
 
     // Summary
     el('report-summary').textContent = report.summary || '';
@@ -1456,21 +1026,56 @@ YPE html>
           '<div class="history-empty">No audits yet. Submit your first contract above.</div>';
         return;
       }
-      el('history-container').innerHTML = `<div class="history-list">${
-        items.map(item => `
-          <div class="history-item" onclick="loadFromHistory('${escAttr(item.repo_url)}')">
-            <div class="history-risk">
-              <span class="sev-badge sev-${item.overall_risk}">${item.overall_risk}</span>
-            </div>
-            <div class="history-url">${escHtml(item.repo_url)}</div>
-            <div class="history-score">${item.score}/100</div>
-          </div>
-        `).join('')
-      }</div>`;
+      // Built with DOM APIs (not innerHTML + string interpolation) so a
+      // repo_url containing quotes or HTML can never break out of an
+      // attribute or inject markup — the old onclick="...('${url}')"
+      // pattern was vulnerable to that.
+      const list = document.createElement('div');
+      list.className = 'history-list';
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'history-item';
+        row.dataset.riskFilter = item.overall_risk || '';
+        row.dataset.repoUrl = item.repo_url;
+
+        const riskWrap = document.createElement('div');
+        riskWrap.className = 'history-risk';
+        const badge = document.createElement('span');
+        badge.className = `sev-badge sev-${item.overall_risk}`;
+        badge.textContent = item.overall_risk;
+        riskWrap.appendChild(badge);
+
+        const urlEl = document.createElement('div');
+        urlEl.className = 'history-url';
+        urlEl.textContent = item.repo_url;
+
+        const scoreEl = document.createElement('div');
+        scoreEl.className = 'history-score';
+        scoreEl.textContent = `${item.score}/100`;
+
+        row.append(riskWrap, urlEl, scoreEl);
+        row.addEventListener('click', () => loadFromHistory(item.repo_url));
+        list.appendChild(row);
+      });
+
+      el('history-container').innerHTML = '';
+      el('history-container').appendChild(list);
+      applyHistoryFilter();
     } catch (err) {
       el('history-container').innerHTML =
-        `<div class="history-empty" style="color:var(--critical)">Could not read from contract ${CONTRACT_ADDRESS}: ${err.message || err}. Check the address above.</div>`;
+        `<div class="history-empty" style="color:var(--critical)">Could not read from contract ${escHtml(CONTRACT_ADDRESS)}: ${escHtml(err.message || String(err))}. Check the address above.</div>`;
     }
+  };
+
+  // ── History filter/search (client-side only — no contract change) ─────────
+  window.applyHistoryFilter = function() {
+    const q = (el('history-search')?.value || '').trim().toLowerCase();
+    const risk = el('history-risk-filter')?.value || 'all';
+    document.querySelectorAll('#history-container .history-item').forEach(row => {
+      const matchesQ = !q || row.dataset.repoUrl.toLowerCase().includes(q);
+      const matchesRisk = risk === 'all' || row.dataset.riskFilter === risk;
+      row.style.display = (matchesQ && matchesRisk) ? '' : 'none';
+    });
   };
 
   window.loadFromHistory = async function(repoUrl) {
@@ -1492,6 +1097,159 @@ YPE html>
       el('stat-count').textContent = 'err';
       el('stat-count').title = err.message || String(err);
     }
+    await loadStatsDashboard();
+  }
+
+  // ── Aggregate stats dashboard (new: get_audit_stats view call) ─────────────
+  async function loadStatsDashboard() {
+    const box = el('stats-dashboard');
+    if (!box) return;
+    try {
+      const raw = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_audit_stats',
+        args: [], kwargs: {},
+      });
+      const stats = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!stats || !stats.total_audits) {
+        box.innerHTML = '<div class="history-empty">No audits yet — stats will appear here.</div>';
+        return;
+      }
+      const rc = stats.risk_counts || {};
+      const riskOrder = ['Critical', 'High', 'Medium', 'Low', 'Info'];
+      const maxRisk = Math.max(1, ...riskOrder.map(r => rc[r] || 0));
+
+      const riskBars = riskOrder.map(r => `
+        <div class="stat-bar-row">
+          <div class="stat-bar-label">${escHtml(r)}</div>
+          <div class="stat-bar-track">
+            <div class="stat-bar-fill" style="width:${((rc[r]||0)/maxRisk*100).toFixed(0)}%;background:${riskColor(r)}"></div>
+          </div>
+          <div class="stat-bar-count">${rc[r] || 0}</div>
+        </div>
+      `).join('');
+
+      const cats = (stats.top_categories || []);
+      const catList = cats.length
+        ? cats.map(c => `<div class="cat-chip">${escHtml(c.category)} <span>${c.count}</span></div>`).join('')
+        : '<div class="history-empty" style="padding:12px">No vulnerability categories recorded yet.</div>';
+
+      box.innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-card-value">${stats.total_audits}</div><div class="stat-card-label">total audits</div></div>
+          <div class="stat-card"><div class="stat-card-value">${stats.unique_repos}</div><div class="stat-card-label">unique repos</div></div>
+        </div>
+        <div class="stat-bars">${riskBars}</div>
+        <div class="cat-title">Most common vulnerability categories</div>
+        <div class="cat-chips">${catList}</div>
+      `;
+    } catch (err) {
+      box.innerHTML = `<div class="history-empty" style="color:var(--critical)">Could not load stats: ${escHtml(err.message || String(err))}</div>`;
+    }
+  }
+
+  // ── Per-repo score/risk trend (new: get_audit_trend view call) ─────────────
+  async function loadTrend(repoUrl) {
+    const box = el('trend-box');
+    if (!box) return;
+    box.innerHTML = '<div class="history-empty">Loading trend…</div>';
+    try {
+      const raw = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName: 'get_audit_trend',
+        args: [], kwargs: { repo_url: repoUrl },
+      });
+      const trend = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!trend || trend.length <= 1) {
+        box.innerHTML = '<div class="history-empty">Only one audit on record for this repo — re-audit it later to see a trend.</div>';
+        return;
+      }
+      const max = 100;
+      box.innerHTML = `<div class="trend-row">${
+        trend.map(pt => `
+          <div class="trend-point" title="audit #${pt.seq}: score ${pt.score}, risk ${escHtml(pt.overall_risk)}">
+            <div class="trend-bar" style="height:${Math.max(4, pt.score/max*48)}px;background:${riskColor(pt.overall_risk)}"></div>
+            <div class="trend-score">${pt.score}</div>
+          </div>
+        `).join('')
+      }</div>`;
+    } catch (err) {
+      box.innerHTML = `<div class="history-empty" style="color:var(--critical)">Could not load trend: ${escHtml(err.message || String(err))}</div>`;
+    }
+  }
+
+  // ── SVG badge for embedding in a repo's README ──────────────────────────────
+  function renderBadge(report, repoUrl) {
+    const box = el('badge-box');
+    if (!box) return;
+    const score = parseInt(report.score) || 0;
+    const color = riskColor(report.overall_risk);
+    const label = 'security score';
+    const value = `${score}/100`;
+    const labelW = 96, valueW = 56, h = 20;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${labelW+valueW}" height="${h}">` +
+      `<rect width="${labelW}" height="${h}" fill="#333"/>` +
+      `<rect x="${labelW}" width="${valueW}" height="${h}" fill="${color}"/>` +
+      `<text x="${labelW/2}" y="14" font-family="monospace" font-size="11" fill="#fff" text-anchor="middle">${label}</text>` +
+      `<text x="${labelW+valueW/2}" y="14" font-family="monospace" font-size="11" fill="#111" text-anchor="middle">${value}</text>` +
+      `</svg>`;
+    const dataUri = 'data:image/svg+xml;base64,' + btoa(svg);
+    const markdown = `[![Security score](${dataUri})](${repoUrl})`;
+
+    box.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = dataUri;
+    img.alt = 'security score badge';
+    img.style.display = 'block';
+    img.style.marginBottom = '8px';
+    const ta = document.createElement('textarea');
+    ta.readOnly = true;
+    ta.className = 'badge-embed';
+    ta.value = markdown;
+    ta.onclick = () => ta.select();
+    box.append(img, ta);
+  }
+
+  // ── Export report as JSON / Markdown ────────────────────────────────────────
+  function downloadReport(report, repoUrl, format) {
+    let content, filename, mime;
+    if (format === 'json') {
+      content = JSON.stringify(report, null, 2);
+      filename = 'audit-report.json';
+      mime = 'application/json';
+    } else {
+      const vulns = (report.vulnerabilities || []).map(v =>
+        `### ${v.id || ''} — ${v.title} (${v.severity})\n\n**Category:** ${v.category}\n\n${v.description}\n\n**Recommendation:** ${v.recommendation || ''}\n`
+      ).join('\n');
+      content = `# Security Audit — ${report.language}\n\n` +
+        `**Repo:** ${repoUrl}\n\n**Overall risk:** ${report.overall_risk}  \n**Score:** ${report.score}/100\n\n` +
+        `## Summary\n\n${report.summary || ''}\n\n## Vulnerabilities\n\n${vulns || 'None found.'}\n`;
+      filename = 'audit-report.md';
+      mime = 'text/markdown';
+    }
+    const blob = new Blob([content], { type: mime });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // ── Permalink support (?repo=&contract=) ────────────────────────────────────
+  async function loadFromQueryString() {
+    const params = new URLSearchParams(window.location.search);
+    const qContract = params.get('contract');
+    const qRepo = params.get('repo');
+    if (qContract && /^0x[a-fA-F0-9]{40}$/.test(qContract)) {
+      CONTRACT_ADDRESS = qContract;
+      localStorage.setItem('genlayer_contract_address', qContract);
+      el('contract-address').value = qContract;
+    }
+    if (qRepo) {
+      el('repo-url').value = qRepo;
+      setStatus('Loading audit from link…', 'loading');
+      await fetchAndShowReport(qRepo);
+    }
   }
 
   // ── Utils ──────────────────────────────────────────────────────────────────
@@ -1504,6 +1262,7 @@ YPE html>
   el('contract-address').value = CONTRACT_ADDRESS;
   loadHistory();
   loadStats();
+  loadFromQueryString();
 </script>
 </body>
 </html>
