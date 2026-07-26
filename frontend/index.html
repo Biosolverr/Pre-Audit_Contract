@@ -665,7 +665,7 @@
       <div class="status-box" id="status-box"></div>
       <div id="last-tx-box" style="display:none;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim);">
         Last transaction: <code id="last-tx-hash" style="color:var(--muted);user-select:all;"></code>
-        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px;margin-left:6px;" onclick="navigator.clipboard.writeText(el('last-tx-hash').textContent)">copy</button>
+        <button class="btn btn-ghost" style="padding:3px 8px;font-size:10px;margin-left:6px;" onclick="copyLastTxHash()">copy</button>
       </div>
     </div>
   </div>
@@ -1288,6 +1288,10 @@
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
   function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
+
+  window.copyLastTxHash = function() {
+    navigator.clipboard.writeText(el('last-tx-hash').textContent);
+  };
 
   // ── Raw contract-call panel (dev/test — mirrors Studio's Call Contract) ────
   window.rawCall = async function(functionName, needsRepoUrl) {
