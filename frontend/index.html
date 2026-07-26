@@ -767,6 +767,30 @@
   </div>
 </section>
 
+<!-- ── Raw contract calls (dev/test panel) ─────────────────────────────────── -->
+<section class="history-section">
+  <div class="container">
+    <div class="section-label">05 — Raw Contract Calls (dev/test)</div>
+    <div class="form-card">
+      <label>repo_url (used by the calls that need it)</label>
+      <div class="form-row" style="margin-bottom:14px;">
+        <div class="input-group">
+          <input type="text" id="raw-repo-url" placeholder="https://github.com/owner/repo/blob/main/contracts/Token.sol" />
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:0;">
+        <button class="btn btn-ghost" onclick="rawCall('get_audit_count')">get_audit_count</button>
+        <button class="btn btn-ghost" onclick="rawCall('get_recent_audits')">get_recent_audits</button>
+        <button class="btn btn-ghost" onclick="rawCall('get_all_audits')">get_all_audits</button>
+        <button class="btn btn-ghost" onclick="rawCall('get_audit_stats')">get_audit_stats</button>
+        <button class="btn btn-ghost" onclick="rawCall('get_audit', true)">get_audit(repo_url)</button>
+        <button class="btn btn-ghost" onclick="rawCall('get_audit_trend', true)">get_audit_trend(repo_url)</button>
+      </div>
+      <pre id="raw-output" style="margin-top:14px;background:var(--surface2);border:1px solid var(--border2);border-radius:5px;padding:12px 14px;font-family:var(--mono);font-size:11px;color:var(--muted);white-space:pre-wrap;word-break:break-all;max-height:320px;overflow:auto;">Click a button above to call that read method directly and see the raw JSON response.</pre>
+    </div>
+  </div>
+</section>
+
 <!-- ── Footer ───────────────────────────────────────────────────────────────── -->
 <footer>
   <div class="container">
@@ -1258,6 +1282,34 @@
   }
   function escAttr(s) { return String(s).replace(/'/g,"\\'"); }
 
+  // ── Raw contract-call panel (dev/test — mirrors Studio's Call Contract) ────
+  window.rawCall = async function(functionName, needsRepoUrl) {
+    const out = el('raw-output');
+    const kwargs = {};
+    if (needsRepoUrl) {
+      const repoUrl = el('raw-repo-url').value.trim();
+      if (!repoUrl) {
+        out.textContent = 'Fill in repo_url above first — this call requires it.';
+        return;
+      }
+      kwargs.repo_url = repoUrl;
+    }
+    out.textContent = `Calling ${functionName}…`;
+    try {
+      const raw = await client.readContract({
+        address: CONTRACT_ADDRESS,
+        functionName,
+        args: [],
+        kwargs,
+      });
+      let pretty = raw;
+      try { pretty = JSON.stringify(JSON.parse(raw), null, 2); } catch (_) { /* not JSON, show as-is */ }
+      out.textContent = pretty === '' ? '(empty string — no data found for this repo_url)' : pretty;
+    } catch (err) {
+      out.textContent = `Error calling ${functionName}: ${err.message || String(err)}`;
+    }
+  };
+
   // ── Init ───────────────────────────────────────────────────────────────────
   el('contract-address').value = CONTRACT_ADDRESS;
   loadHistory();
@@ -1266,4 +1318,3 @@
 </script>
 </body>
 </html>
-
